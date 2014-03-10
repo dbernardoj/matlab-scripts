@@ -23,7 +23,7 @@ close all
 % can be selectively closed.
 child_handles = allchild(0);
 names = get(child_handles,'Name');
-k = find(strncmp('Classification tree viewer', names, 3));
+k = strncmp('Classification tree viewer', names, 3);
 close(child_handles(k))
 clear k names child_handles
 % * IMPORTING THE DATA
