@@ -1,0 +1,14 @@
+function [ datadiv ] = datadiv_pairwise( X,Y )
+%DATADIV_PAIRWISE Summary of this function goes here
+%   Detailed explanation goes here
+[~,index] = unique(Y,'first');      % Capture the index, ignore junk
+classes = Y(sort(index));     % Index y with the sorted index
+
+datadiv = cell(2,length(classes));
+for i=1:length(classes)
+    datadiv{2,i} = X(~cellfun(@(x)strcmp(x,'saudavel'),Y),:);
+    datadiv = Y(~cellfun(@(x)strcmp(x,'saudavel'),Y));
+end
+
+end
+

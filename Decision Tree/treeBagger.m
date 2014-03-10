@@ -32,3 +32,5 @@ names_label = {'1','2','3','4','5','6','7','8','9','10','11','12','13',...,
 
 b = TreeBagger(50, people_meas, people_status, 'OOBPred','on');
 plot(oobError(b));
+xlabel('number of grown trees');
+ylabel('out-of-bag classification error');

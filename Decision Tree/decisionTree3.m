@@ -36,10 +36,24 @@ filename2 = '/Users/pma007/Dropbox/TCC/Dados/Dados mfVEP Reduzido.xlsx';
 status_fn = '/Users/pma007/Dropbox/TCC/Dados/status mfVEP.xlsx';
 %}
 
-filename1 = sprintf('/Users/%s/Dropbox/TCC/Dados/Dados mfVEP.xlsx',user);
-filename2 = ...
-    sprintf('/Users/%s/Dropbox/TCC/Dados/Dados mfVEP Reduzido.xlsx',user);
-status_fn = sprintf('/Users/%s/Dropbox/TCC/Dados/status mfVEP.xlsx',user);
+prompt = 'What data do you want to work on? [1-Old | 2-New]';
+asw = input(prompt);
+pass = false;
+while pass == false
+    switch asw
+        case 1
+            filename1 = sprintf('/Users/%s/Dropbox/TCC/Dados/Dados mfVEP.xlsx',user);
+            %filename2 = sprintf('/Users/%s/Dropbox/TCC/Dados/Dados mfVEP Reduzido.xlsx',user);
+            status_fn = sprintf('/Users/%s/Dropbox/TCC/Dados/status mfVEP.xlsx',user);
+            pass = true;
+        case 2
+            filename1 = sprintf('/Users/%s/Dropbox/TCC/Dados/Dados mfVEP - Novos.xlsx',user);
+            status_fn = sprintf('/Users/%s/Dropbox/TCC/Dados/status mfVEP.xlsx',user);
+            pass = true;
+        otherwise
+            asw = input(prompt);
+    end
+end
 
 % * EXPORTING THE DATA
 %
@@ -56,34 +70,50 @@ predictWrite = '/Users/iraquitanfilho/Dropbox/TCC/Dados/Predictions.xlsx';
 %}
 %% PROCESSING THE DATA
 % First specify the sheet names for the Excell raw data.
+if asw == 1
+    sheet1 = 'Saudavel 1';
+    sheet2 = 'Doentes 1';
+    sheet3 = 'Saudavel 2';
+    sheet4 = 'Doentes 2';
+elseif asw == 2
+    sheet1 = 'UFPA';
+    sheet2 = 'Neuromielite optica UFPA';
+    sheet3 = 'Esclerose Multipla UFPA';
+end
 
-sheet1 = 'Saudavel 1';
-sheet2 = 'Doentes 1';
-sheet3 = 'Saudavel 2';
-sheet4 = 'Doentes 2';
 
 % Create one variable to receive the values of each sheet (original data).
-
-saudaveis1 = xlsread(filename1, sheet1, 'a1:p60');
-doentes1 = xlsread(filename1, sheet2, 'a1:p60');
-saudaveis2 = xlsread(filename1, sheet3, 'a1:p60');
-doentes2 = xlsread(filename1, sheet4, 'a1:p60');
-
-%{
-% Create one variable to receive the values of each sheet (reduced data).
-
-saudaveis1 = xlsread(filename2, sheet1, 'b1:q32');
-doentes1 = xlsread(filename2, sheet2, 'b1:q32');
-saudaveis2 = xlsread(filename2, sheet3, 'b1:q32');
-doentes2 = xlsread(filename2, sheet4, 'b1:q32');
-%}
+if asw == 1
+    saudaveis1 = xlsread(filename1, sheet1, 'a1:p60');
+    doentes1 = xlsread(filename1, sheet2, 'a1:p60');
+    saudaveis2 = xlsread(filename1, sheet3, 'a1:p60');
+    doentes2 = xlsread(filename1, sheet4, 'a1:p60');
+elseif asw == 2
+    saudaveis = xlsread(filename1, sheet1, 'b2:w61');
+    neuromielite = xlsread(filename1, sheet2, 'b2:x61');
+    esclerose = xlsread(filename1, sheet3, 'b2:q61');
+end
 
 % Create *people_meas* matrix using vertcat to join all data.
 % * (64 observations x 60 features)
-people_meas = vertcat(saudaveis1',saudaveis2',doentes1',doentes2');
-
+if asw == 1
+    people_meas = vertcat(saudaveis1',saudaveis2',doentes1',doentes2');
 % Create *people_status* matrix.
-[~,~,people_status] = xlsread(status_fn);
+    [~,~,people_status] = xlsread(status_fn);
+elseif asw == 2
+    people_meas = vertcat(saudaveis',neuromielite',esclerose');
+% Create parameter status to compare with the predictions.
+    people_status = cell(size(people_meas,1),1);
+    for i=1:length(people_meas)
+        if i <= size(saudaveis,2)
+            people_status{i} = 'saudavel';
+        elseif i <= size(saudaveis,2) + size(neuromielite,2)
+            people_status{i} = 'neuromielite otica';
+        else
+            people_status{i} = 'esclerose multipla';
+        end
+    end
+end
 
 % Assing label to the features.
 features_label = {'1','2','3','4','5','6','7','8','9','10','11','12',...,
@@ -448,7 +478,6 @@ grid on
 
 % Find the features with a threshold
 selFeats = find(nelements >= 300);
-
 
 %% GENERATES NEW TREES WITH THE SELECTED FEATURES
 %{
