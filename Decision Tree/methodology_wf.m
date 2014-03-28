@@ -14,12 +14,12 @@ else
     result_struct.SelectedFeatures_2 = sf_2;
 end
 %% Compare selected features
-if ~isempty(sf_1) && ~isempty(sf_2)
+if ~strcmp(sf_1,'Empty') && ~strcmp(sf_2,'Empty')
     [results,eval_results] = compareFeatures_2(X,Y,sf_1,sf_2);
-elseif isempty(sf_1)
+elseif strcmp(sf_1,'Empty')
     sf_1 = 1:size(X,2);
     [results,eval_results] = compareFeatures_2(X,Y,sf_1,sf_2);
-elseif isempty(sf_2)
+elseif strcmp(sf_2,'Empty')
     sf_2 = 1:size(X,2);
     [results,eval_results] = compareFeatures_2(X,Y,sf_1,sf_2);
 end
