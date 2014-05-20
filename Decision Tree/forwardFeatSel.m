@@ -48,7 +48,11 @@ xlabel('P Value');
 ylabel('CDF Value');
 grid on
 
-featSmallPoFive = find(p < 0.05);
+featSmallPoOne = find(p < 0.01);
+
+if isempty(featSmallPoOne)
+    featSmallPoOne = 1:size(X,2);
+end
 
 % Features having _p-values_ close to zero and features having _p-values_
 % smaller than 0.05, mean that they have strong discrimination power. One
@@ -92,7 +96,7 @@ fsCVLocal = fs1(fsLocal)
 % of features.
 
 [fsCVforBest,historyCV] = sequentialfs(classf,X,Y,'cv',tenfoldCVP,...
-    'nfeatures',length(featSmallPoFive));
+    'nfeatures',length(featSmallPoOne));
 subplot(1,3,2);
 plot(historyCV.Crit,'o');
 xlabel('Number of Features');
@@ -149,10 +153,10 @@ end
 % training set(i.e.m without performing cross-validation during the feature
 % selection procedure) as a function of the number of features:
 [fsResubforBest,historyResub] = sequentialfs(classf,X(:,fs1),...
-    Y,'cv','resubstitution','nfeatures',length(featSmallPoFive));
+    Y,'cv','resubstitution','nfeatures',length(featSmallPoOne));
 subplot(1,3,3);
-plot(1:length(featSmallPoFive),historyCV.Crit,'bo',...
-    1:length(featSmallPoFive),historyResub.Crit,'r^');
+plot(1:length(featSmallPoOne),historyCV.Crit,'bo',...
+    1:length(featSmallPoOne),historyResub.Crit,'r^');
 xlabel('Number of Features');
 ylabel('MCE');
 title('Comparison of Resub and FS Feature Selection');
@@ -181,4 +185,3 @@ testMCEforMins
 [~,bestFeatsIdx] = min(testMCEforMins);
 selected_feats = fs1(historyCV.In(minIdxs(bestFeatsIdx),:));
 end
-
